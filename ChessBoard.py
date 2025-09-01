@@ -68,4 +68,58 @@ def main():
 
 if __name__ == "__main__":
     main()
-#I have a big PPp
+
+#New helper to get row/col from mouse
+def get_square_from_mouse(pos):
+    x, y = pos
+    row = y // SQUARE_SIZE
+    col = x // SQUARE_SIZE
+    return row, col
+
+#New function to move pieces (no legality yet)
+def move_piece(board, start, end):
+    sr, sc = start
+    er, ec = end
+    board[er][ec] = board[sr][sc] #copy piece
+    board[sr][sc] = "." #empty old square
+
+#Main loop
+def main():
+    board = create_board()
+    run = True
+    clock = pygame.time.Clock()
+
+    selected_square = None #stores first click(row, col)
+    turn = "w" #white starts 
+
+    while run:
+        clock.tick(60)  # 60 FPS
+       
+       #Draw board + pieces
+    draw_board(WIN, board)
+    if selected_square: #highlight selected piece
+        row, col = selected_square
+        highlight = pygame.Surface((SQUARE_SIZE, SQUARE_SIZE))
+        highlight.set_alpha(120) #transpareny
+        highlight.fill((255, 255,0)) #yellow
+        WIN.blit(highlight, (col * SQUARE_SIZE, row * SQUARE_SIZE))
+pygame.display.update()
+
+for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+        run = False
+    elif event.type == pygame.MOUSEBUTTONDOWN:
+        row, col = get_square_from_mouse(event.pos)
+        if selected_square is None:
+            #First click: select a piece if it matches turn
+            piece = board[row][col]
+            if piece != "." and piece[0] == turn:
+                selected_square = (row, col)
+        else:
+            # second click: move piece 
+            move_piece(board, selected_square, (row, col))
+            selected_square = None
+            #Switch turn
+            turn = "b" if turn == "w" else "w"
+
+    pygame.quit()
